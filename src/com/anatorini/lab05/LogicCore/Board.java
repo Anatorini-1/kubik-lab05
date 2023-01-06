@@ -2,6 +2,7 @@ package com.anatorini.lab05.LogicCore;
 
 import com.anatorini.lab05.Entities.Ball;
 import com.anatorini.lab05.Entities.GameEntity;
+import com.anatorini.lab05.Entities.Player;
 import com.anatorini.lab05.Main;
 
 import java.awt.*;
@@ -35,6 +36,16 @@ public class Board {
         return true;
     }
 
+    synchronized public void score(Ball b){
+        if(b.getPositionX() == 0){
+            Main.scoreLeft++;
+            Main.leftGoals.set(b.getPositionY(),Main.leftGoals.get(b.getPositionY())+1);
+        }else{
+            Main.scoreRight++;
+            Main.rightGoals.set(b.getPositionY(),Main.rightGoals.get(b.getPositionY())+1);
+        }
+    }
+
     synchronized public ArrayList<Integer> getFreeRows(){
         var toReturn = new ArrayList<Integer>();
         boolean b = true;
@@ -51,6 +62,19 @@ public class Board {
         return toReturn;
     }
 
+
+    synchronized public boolean isPlayerClosestToBall(Player p,Ball b){
+       LinkedList<Player> players = getPlayers();
+       Player closest = p;
+       for(Player player : players){
+           if(player.getPositionX() != p.getPositionX()) continue;
+           if(Math.sqrt(Math.pow(player.getPositionX()-b.getPositionX(),2)+Math.pow(player.getPositionY()-b.getPositionY(),2)) < Math.sqrt(Math.pow(closest.getPositionX()-b.getPositionX(),2)+Math.pow(closest.getPositionY()-b.getPositionY(),2))){
+               closest = player;
+           }
+       }
+       return closest == p;
+    }
+
     synchronized public LinkedList<Ball> getBalls(){
         LinkedList<Ball> balls = new LinkedList<>();
         for(int i=0;i<board.length;i++){
@@ -62,7 +86,53 @@ public class Board {
         }
         return balls;
     }
+
+    synchronized public LinkedList<Player> getPlayers(){
+        LinkedList<Player> players = new LinkedList<>();
+        for(int i=0;i<board.length;i++){
+            for(int j=0;j<board[i].length;j++){
+                if(board[i][j] != null && board[i][j] instanceof Player){
+                    players.add((Player) board[i][j]);
+                }
+            }
+        }
+        return players;
+    }
     public Dimension getSize(){
         return new Dimension(board.length,board[0].length);
     }
+
+    public void dumpBoardState(){
+        for(int i=0;i< getSize().getHeight();i++){
+            for(int j=0;j<getSize().getWidth();j++){
+                if(board[i][j] instanceof Ball){
+                    System.out.print("B");
+                }else if(board[i][j] instanceof Player){
+                    System.out.print("P");
+                }else{
+                    System.out.print(" ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    public synchronized void holdDispenser(){
+        if(Main.bd.getState().equals(Thread.State.RUNNABLE)){
+            System.out.println("Le hold");
+            try {
+                Main.bd.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+    public synchronized void releaseDispenser(){
+        if(Main.bd.getState().equals(Thread.State.WAITING)){
+            System.out.println("Le release");
+            Main.bd.notify();
+        }
+    }
+
 }

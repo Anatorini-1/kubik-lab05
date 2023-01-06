@@ -6,17 +6,15 @@ import javax.swing.*;
 import java.awt.*;
 
 public class GameFrame extends JFrame {
-    private Board board;
     private GamePanel gamePanel;
     private ControlPanel controlPanel;
-    public GameFrame(Board board){
+    public GameFrame(){
         setSize(850,800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBackground(Color.white);
         this.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-        this.board = board;
-        this.gamePanel=new GamePanel(board);
+        this.gamePanel=new GamePanel();
         this.controlPanel=new ControlPanel();
         c.gridx=0;
         c.gridy=0;

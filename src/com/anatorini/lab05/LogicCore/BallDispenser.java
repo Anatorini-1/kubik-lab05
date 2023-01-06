@@ -1,32 +1,36 @@
 package com.anatorini.lab05.LogicCore;
 
 import com.anatorini.lab05.Entities.Ball;
+import com.anatorini.lab05.Main;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public class BallDispenser extends Thread{
-    private Board board;
-    public BallDispenser(Board board){
-        this.board = board;
+    public BallDispenser(){
     }
     @Override
     public void run(){
         while (true){
             try {
-                sleep(100);
+                sleep(Main.ballSpeed);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            if(board.getBalls().size()<5){
-                    int pos = board.getFreeRows().get((int)(Math.random()*board.getFreeRows().size()));
-                    Ball b = new Ball((int)(board.getSize().getWidth()/2),pos,board,(Math.random() < 0.5 ? 1 : -1), Color.RED);
+            if(!Main.isRunning) continue;
+            if(Main.board.getBalls().size()< Main.ballCount){
+                ArrayList<Integer> rows = Main.board.getFreeRows();
+                //Yes, "rows"" is unnecessary, but it doesn't work without it (for some reason)
+                    int posY = rows.get((int)(Math.random()*rows.size()-1));
+                    Ball b = new Ball((int)(Main.board.getSize().getWidth()/2),posY,Main.board,(Math.random() < 0.5 ? 1 : -1), Color.RED);
                     try {
-                        board.set(b);
+                        Main.board.set(b);
                         b.start();
                     } catch (SpaceAlreadyOccupiedException e) {
                         throw new RuntimeException(e);
                     }
             }
+            else Thread.yield();
         }
     }
 }

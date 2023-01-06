@@ -3,6 +3,7 @@ package com.anatorini.lab05.Entities;
 
 import com.anatorini.lab05.LogicCore.Board;
 import com.anatorini.lab05.LogicCore.SpaceAlreadyOccupiedException;
+import com.anatorini.lab05.Main;
 
 import java.awt.*;
 
@@ -50,7 +51,7 @@ public abstract class GameEntity extends Thread{
               velocityX = -velocityX;
               velocityY = -velocityY;
        }
-
+        //System.out.println(this instanceof Ball ? "Ball" : "Player "+ "Moved to "+positionX+" "+positionY);
 
     }
     public abstract void action();
@@ -58,16 +59,17 @@ public abstract class GameEntity extends Thread{
     public final void run(){
         while (!disposable){
             try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                if(Main.isRunning) {
+                    move();
+                    action();
+                }
+                else Thread.yield();
+
+                if(this instanceof Ball) sleep(Main.ballSpeed+(int)(Math.random()*Main.ballSpeed));
+                else sleep(Main.playerSpeed+(int)(Math.random()*Main.playerSpeed));
+            } catch (InterruptedException | SpaceAlreadyOccupiedException e) {
+                e.printStackTrace();
             }
-            try {
-                move();
-            } catch (SpaceAlreadyOccupiedException e) {
-                throw new RuntimeException(e);
-            }
-            action();
         }
     }
 }
